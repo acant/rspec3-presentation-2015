@@ -5,9 +5,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=1024, user-scalable=no">
 
-	<title>My Last Year with RSpec: a workshop</title>
+	<title>Passing More Years with RSpec: presentation and workshop</title>
 
-	<meta name="description" content="My last year with RSpec: a workshop">
+	<meta name="description" content="Passing More Years with RSpec: presentaiton and workshop">
 	<meta name="author" content="Andrew Sullivan Cant">
 
 	
@@ -38,34 +38,15 @@
 <!-- Begin slides. Just make elements with a class of slide. -->
 
 <section class="slide" id="title-slide">
-	<h1>My Last Year with RSpec:<br />a workshop</h1>
+	<h1>Passing More Years with RSpec</h1>
 </section>
 
 <section class="slide">
-	<h1>Who?</h1>
+	<h1>March 2013 <br />RSpec v2.10</h1>
 </section>
 
 <section class="slide">
-	<h2>Test I have know before</h2>
-	<ul>
-		<li>C</li>
-		<li>C#</li>
-		<li>Perl</li>
-		<li>Java</li>
-		<li>PHP</li>
-	</ul>
-</section>
-
-<section class="slide">
-	<h2>What I am using now</h2>
-	<ul>
-		<li>RSpec</li>
-		<li>Cucumber</li>
-		<li>Jasmine</li>
-	</ul>
-</section>
-
-<section class="slide">
+	<h2>Unit Test</h2>
 	<pre><code>
 class ClassTest < Test::Unit::TestCase
   def setup
@@ -84,10 +65,11 @@ end
 </section>
 
 <section class="slide">
+	<h2>RSpec 2.x</h2>
 	<pre><code>
 describe Class
   before(:each) do
-    #Do setup stuff
+    # Do setup stuff
   end
 
   describe '#method' do
@@ -104,7 +86,51 @@ end
 </section>
 
 <section class="slide">
+	<h2>RSpec 3.x</h2>
+	<pre><code>
+describe Class
+  before(:each) do
+    # Do setup stuff
+  end
+
+  <mark>subject(:test_class) { described_class.new('boop') }</mark>
+
+  describe '#method' do
+    subject { test_class.method('beep') }
+
+    let(:foobar) { 'DEADBEEF' }
+
+    it { <mark>is_expected.to eq(foobar)</mark> }
+    specify { <mark>expect(system_property).to eq(foobar)</mark> }
+    specify { <mark>expect(other_system_property).to eq(foobar)</mark> }
+  end
+end
+	</pre></code>
+</section>
+
+<section class="slide">
+<h2>RSpec 3.3.2</h2>
+<ul>
+	<li>largely clean up</li>
+	<li>removing old and deprecated things</li>
+	<li><a href="https://github.com/rspec/rspec-core/blob/master/Changelog.md">lots of changes!</a></li>
+</ul>
+</section>
+
+<section class="slide">
+	<h1>Bye Bye<br /> Monkey Patches</h1>
+</section>
+
+<section class="slide">
 	<h1>Readability<br />and<br />Aliases</h1>
+</section>
+
+<section class="slide" style="text-align: centre;">
+	<h1>describe <br />==<br /> context</h1>
+</section>
+
+<section class="slide" style="text-align: centre;">
+	<h1>it == <br />specify == <br />example</h1>
 </section>
 
 <section class="slide">
@@ -132,20 +158,16 @@ end
 </section>
 
 <section class="slide">
-	<h1>Define the situation</h1>
-</section>
-
-<section class="slide">
-	<h2>Group it...</h2>
+	<h2>Group the methods situations...</h2>
 	<pre><code>
   describe '#method' do
     context 'when x' do
-      #setup
+      # setup
       it {}
     end
 
     context 'when y' do
-      #setup
+      # setup
       it { ... }
     end
 end
@@ -204,48 +226,82 @@ end
 	<h2>Mocking</h2>
 	<pre><code>
   double('my_name', :field =&gt; 'value')
-  mock('my_name')
-  stub('my_name')
+  <del>mock('my_name')</del>
+  <del>stub('my_name')</del>
+  instance_double(RealClass, :field =&gt; 'value')
+  class_double(RealClass, :class_method =&gt; 'value')
 	</code></pre>
 
 	<h2>...and for Rails</h2>
 	<pre><code>
-  mock_model(MyModel)
-  stub_model(MyModel)
+  mock_model(MyModel) # just a double
+  stub_model(MyModel) # instance of Model + stubs
 	</code></pre>
-
 </section>
 
 <section class="slide">
-	<h2>Expectations</h2>
+	<h2>Basic Expectations</h2>
 	<pre><code>
-  double.stub(:method).
-    with('argument').
-    and_return('result')
+  allow(double).to receive(:method)
+    .with('argument')
+    .and_return('result')
 	</code></pre>
 
 	<pre><code>
-  double.should_receive(:method).
-    with('argument').
-    and_return('result')
+  expect(double).to receive(:method)
+    .with('argument')
+    .and_return('result')
 	</code></pre>
 </section>
 
 <section class="slide">
 	<h2>Other results...</h2>
 	<pre><code>
-  double.stub(:method).and_return('result')
+  allow(double).to receive(:method).and_raise(StandardError)
 	</code></pre>
 	<pre><code>
-  double.stub(:method).and_raise(StandardError)
+  allow(double).to receive(:method).and_throw(:symbol)
 	</code></pre>
 	<pre><code>
-  double.stub(:method).and_throw(StandardError)
+  allow(dbl).to receive(:foo).and_yield(2, 3)
 	</code></pre>
 </section>
 
 <section class="slide">
-	<h2>Mock...but not too much</h2>
+	<h2>...Or various messages</h2>
+	<pre><code>
+  allow(double).to receive_messages(
+    :method1 =&gt; 'value',
+    :method2 =&gt; 'value'
+  )
+	</pre></code>
+	<pre><code>
+  allow(double).to receive_message_chain(:method1, :method2)
+	</pre></code>
+</section>
+
+<section class="slide">
+	<h2>Beware of #receive_message_chain</h2>
+	<img src="images/chain_warning.png" />
+</section>
+
+<section class="slide">
+	<h2>Law of Demeter</h2>
+</section>
+
+<section class="slide">
+	<pre><code>
+      Customer.where(name: 'foo').owe_money.sort_by(:balance.desc).limit(10)
+	</pre></code>
+
+	<pre><code>
+      <del>acme_co.sales_people.orders(:boo).map(&amp;:address)</del>
+      acme_co.open_order_addresses
+	</pre></code>
+</section>
+
+<section class="slide">
+	<h2>...but you can break LoD manually too</h2>
 
 	<pre><code>
   model.method1('value').method2('value').method3('value')
@@ -272,70 +328,78 @@ end
 </section>
 
 <section class="slide">
-	<h2>And finally it should...</h2>
+	<h2>And we have expectations...</h2>
 	<pre><code>
   subject { 'expected' }
-  it { should == 'expected' }
+  it { is_expected.to eq('expected') }
 	</code></pre>
 
 	<pre><code>
+  require 'rspec/its'
   subject { 'expected' }
-  its(:count) { should == 8 }
+  its(:count) { is_expected.to eq(8) }
 	</code></pre>
 
 	<pre><code>
-  before { get :show  )
-  specify { response.body.should == 'expected' }
+  before { get :show )
+  specify { expect(response.body).to eq('expected') }
 	</code></pre>
+</section>
+
+<section class="slide">
+	<h2>There are other matchers</h2>
+	<pre><code>
+      it { is_expected.to raise_error(StandardError) }
+
+      it { is_expected.to be_nil }
+
+      it { is_expected.to be_persisted }
+	</pre></code>
+
+	<h2><a href="https://relishapp.com/rspec/rspec-expectations/docs/built-in-matchers">...and many more</a></h2>
 </section>
 
 <section class="slide">
 	<h2>And we finally have all the pieces for...</h2>
 	<pre><code>
+
 describe Class
   before(:each) do
-    #Do setup stuff
+    # Do setup stuff
   end
 
+  subject(:test_class) { described_class.new('boop') }
+
   describe '#method' do
-    subject { Class.new('boop').method('beep') }
+    subject { test_class.method('beep') }
 
     let(:foobar) { 'DEADBEEF' }
 
-    it { should == foobar }
-    specify { system_property.should == foobar }
-    specify { other_system_property.should == 42 }
+    it { is_expected.to eq(foobar) }
+    specify { expect(system_property).to eq(foobar) }
+    specify { expect(other_system_property).to eq(foobar) }
   end
 end
 	</pre></code>
 </section>
 
 <section class="slide">
-	<h2>Make a table</h2>
-	<pre><code>
-  describe '#method' do
-    subject { model.method(argument) }
-    context { let(:argument) { 'x' } ; it { should be_false } }
-    context { let(:argument) { 'y' } ; it { should be_false } }
-    context { let(:argument) { 'z' } ; it { should be_true } }
-  end
-	</code></pre>
+	<h2>Upgrading from v2 to v3</h2>
+	<ul>
+		<li>use <a href="https://rubygems.org/gems/transpec">transpec gem</a></li>
+		<li>and follow the official upgrade <a href="https://relishapp.com/rspec/docs/upgrade">process</a></li>
+		<li>v2.x &rarr; v2.99 &rarr; v3.x</li>
+	</ul>
 </section>
 
 <section class="slide">
 	<h2>References</h2>
 	<ul>
-		<li>
-			<a href="http://rspec.info/">http://rspec.info/</a><br />
-			this is not great
-		</li>
-		<li>
-			<a href="https://www.relishapp.com/rspec">https://www.relishapp.com/rspec</a><br />
-			I have found this more useful as of late
-		</li>
+		<li><a href="http://rspec.info/">http://rspec.info/</a><br /></li>
+		<li><a href="https://www.relishapp.com/rspec">https://www.relishapp.com/rspec</a></li>
 		<li>
 			<a href="http://pragprog.com/book/achbd/the-rspec-book">http://pragprog.com/book/achbd/the-rspec-book</a><br />
-			head good thing about it, written by people on the RSpec team
+			written by people on the RSpec team
 		</li>
 	</ul>
 </section>
